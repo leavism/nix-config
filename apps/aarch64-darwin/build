@@ -4,10 +4,20 @@
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
+RED='\033[1;31m'
 NC='\033[0m'
 
-# Get current hostname
+# Check if username is provided
+if [ "$#" -ne 1 ]; then
+    echo "${RED}Error: Username is required${NC}"
+    echo "Usage: nix run .#build <username>"
+    exit 1
+fi
+
+# Get hostname automatically and use provided username
 HOSTNAME=$(hostname -s)
+USERNAME="$1"
+
 export NIXPKGS_ALLOW_UNFREE=1
 
 # Determine system type and configuration paths
@@ -15,17 +25,28 @@ if [ "$(uname)" = "Darwin" ]; then
     SYSTEM_TYPE="aarch64-darwin"
     CONFIG_PATH="darwinConfigurations"
     HOST_DIR="hosts/darwin"
+    USER_DIR="home/${USERNAME}"
     DEFAULT_CONFIG="${HOST_DIR}/default.nix"
     SPECIFIC_CONFIG="${HOST_DIR}/${HOSTNAME}.nix"
+    USER_CONFIG="${USER_DIR}/${HOSTNAME}.nix"
 else
     SYSTEM_TYPE="x86_64-linux"
     CONFIG_PATH="nixosConfigurations"
     HOST_DIR="hosts/nixos"
+    USER_DIR="home/${USERNAME}"
     DEFAULT_CONFIG="${HOST_DIR}/default.nix"
     SPECIFIC_CONFIG="${HOST_DIR}/${HOSTNAME}.nix"
+    USER_CONFIG="${USER_DIR}/${HOSTNAME}.nix"
 fi
 
-# Determine which configuration to use
+# Verify user configuration exists
+if [ ! -f "$USER_CONFIG" ]; then
+    echo "${RED}No configuration found for user '${USERNAME}' on host '${HOSTNAME}'${NC}"
+    echo "${RED}Expected configuration at: ${USER_CONFIG}${NC}"
+    exit 1
+fi
+
+# Determine which host configuration to use
 if [ -f "$SPECIFIC_CONFIG" ]; then
     echo "${BLUE}Found specific configuration for hostname '${HOSTNAME}'${NC}"
     echo "${BLUE}Using configuration: ${SPECIFIC_CONFIG}${NC}"
@@ -36,11 +57,13 @@ else
     CONFIG_NAME="default"
 fi
 
+echo "${BLUE}Using user configuration: ${USER_CONFIG}${NC}"
 FLAKE_SYSTEM="${CONFIG_PATH}.${CONFIG_NAME}.system"
 
 echo "${YELLOW}Starting build...${NC}"
 
 # Build the configuration
+shift # Remove username from arguments
 nix --extra-experimental-features 'nix-command flakes' build ".#${FLAKE_SYSTEM}" "$@"
 
 echo "${YELLOW}Cleaning up...${NC}"

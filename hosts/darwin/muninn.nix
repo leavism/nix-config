@@ -1,20 +1,29 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, user,... }:
 
-let user = "leavism"; in
-
+let
+  username = user.name;
+  hostname = config.host;
+in
 {
   imports = [
-    ../../modules/darwin/home-manager.nix
-    ../../modules/shared
-    ../../modules/darwin/dock
+    ../../home/common/darwin
+    ../../home/common/darwin/dock
   ];
+
+  # It me
+  users.users.${username} = {
+    name = "${username}";
+    home = "/Users/${username}";
+    isHidden = false;
+    shell = pkgs.zsh;
+  };
 
   services.nix-daemon.enable = true;
 
   nix = {
     package = pkgs.nix;
     settings = {
-      trusted-users = [ "@admin" "${user}" ];
+      trusted-users = [ "@admin" "${username}" ];
       substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
       trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
     };
@@ -30,6 +39,27 @@ let user = "leavism"; in
       experimental-features = nix-command flakes
     '';
   };
+
+
+  homebrew = {
+      enable = true;
+      casks = [];
+      # onActivation.cleanup = "uninstall";
+
+      # These app IDs are from using the mas CLI app
+      # mas = mac app store
+      # https://github.com/mas-cli/mas
+      #
+      # $ nix shell nixpkgs#mas
+      # $ mas search <app name>
+      #
+      # If you have previously added these apps to your Mac App Store profile (but not installed them on this system),
+      # you may receive an error message "Redownload Unavailable with This Apple ID".
+      # This message is safe to ignore. (https://github.com/dustinlyons/nixos-config/issues/83)
+      masApps = {
+        # Mac App Store install
+      };
+    };
 
   environment.systemPackages = with pkgs; [
     # System specific package installs
@@ -63,7 +93,7 @@ let user = "leavism"; in
     { path = "/System/Applications/Messages.app/"; }
     { path = "/System/Applications/Music.app/"; }
     {
-      path = "${config.users.users.${user}.home}/Downloads";
+      path = "${config.users.users.${user.name}.home}/Downloads";
       section = "others";
       options = "--sort name --view grid --display stack";
     }

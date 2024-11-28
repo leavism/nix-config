@@ -1,13 +1,15 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, user,... }:
 
-let name = "Huy Dang";
-    user = "leavism";
-    email = "ghuydang@gmail.com"; in
+let
+    name = user.fullName;
+    username =  user.name;
+    email =  user.email;
+in
 {
   git = {
     enable = true;
     ignores = [ "*.swp" ];
-    userName = name;
+    userName = username;
     userEmail = email;
     lfs = {
       enable = true;
@@ -27,10 +29,10 @@ let name = "Huy Dang";
     enable = true;
     includes = [
       (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-        "/home/${user}/.ssh/config_external"
+        "/home/${username}/.ssh/config_external"
       )
       (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-        "/Users/${user}/.ssh/config_external"
+        "/Users/${username}/.ssh/config_external"
       )
     ];
     matchBlocks = {
@@ -38,10 +40,10 @@ let name = "Huy Dang";
         identitiesOnly = true;
         identityFile = [
           (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-            "/home/${user}/.ssh/id_github"
+            "/home/${username}/.ssh/id_github"
           )
           (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-            "/Users/${user}/.ssh/id_github"
+            "/Users/${username}/.ssh/id_github"
           )
         ];
       };
