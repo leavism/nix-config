@@ -1,6 +1,6 @@
 { pkgs }:
 
-# === Packages Shared across All Systems
+# Packages shared aross all systems (macOS and NixOS)
 with pkgs; [
   tmux
   vscode

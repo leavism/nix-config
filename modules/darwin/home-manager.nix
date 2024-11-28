@@ -3,13 +3,8 @@
 let
   user = "leavism";
   # Define the content of your file as a derivation
-  sharedFiles = import ../shared/files.nix { inherit config pkgs; };
 in
 {
-  imports = [
-   ./dock
-  ];
-
   # It me
   users.users.${user} = {
     name = "${user}";
@@ -45,9 +40,6 @@ in
       home = {
         enableNixpkgsReleaseCheck = false;
         packages = pkgs.callPackage ./packages.nix {};
-        file = lib.mkMerge [
-          sharedFiles
-        ];
         stateVersion = "23.11";
       };
       programs = {} // import ../shared/home-manager.nix { inherit config pkgs lib; };
@@ -57,17 +49,4 @@ in
       manual.manpages.enable = false;
     };
   };
-
-  # Fully declarative dock using the latest from Nix Store
-  local.dock.enable = true;
-  local.dock.entries = [
-    { path = "/System/Applications/Messages.app/"; }
-    { path = "/System/Applications/Music.app/"; }
-    {
-      path = "${config.users.users.${user}.home}/Downloads";
-      section = "others";
-      options = "--sort name --view grid --display stack";
-    }
-  ];
-
 }

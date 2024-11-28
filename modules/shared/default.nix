@@ -1,7 +1,4 @@
 { config, pkgs, ... }:
-
-let
-in
 {
   nixpkgs = {
     config = {

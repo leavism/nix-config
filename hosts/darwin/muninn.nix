@@ -6,6 +6,7 @@ let user = "leavism"; in
   imports = [
     ../../modules/darwin/home-manager.nix
     ../../modules/shared
+    ../../modules/darwin/dock
   ];
 
   services.nix-daemon.enable = true;
@@ -30,13 +31,14 @@ let user = "leavism"; in
     '';
   };
 
-  system.checks.verifyNixPath = false;
-
   environment.systemPackages = with pkgs; [
     # System specific package installs
   ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; });
 
+
+  # === Configure System Settings ===
   system = {
+    checks.verifyNixPath = false;
     stateVersion = 4;
 
     defaults = {
@@ -54,4 +56,16 @@ let user = "leavism"; in
       };
     };
   };
+
+  # Fully declarative dock using the latest from Nix Store
+  local.dock.enable = true;
+  local.dock.entries = [
+    { path = "/System/Applications/Messages.app/"; }
+    { path = "/System/Applications/Music.app/"; }
+    {
+      path = "${config.users.users.${user}.home}/Downloads";
+      section = "others";
+      options = "--sort name --view grid --display stack";
+    }
+  ];
 }
