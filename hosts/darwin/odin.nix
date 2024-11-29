@@ -1,20 +1,32 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, user,... }:
 
-let user = "leavism"; in
-
+let
+  username = user.name;
+  hostname = config.host;
+  packages = import ../../home/${username}/packages.nix { inherit pkgs; };
+in
 {
   imports = [
-    ../../modules/darwin/home-manager.nix
-    ../../modules/shared
-    ../../modules/darwin/dock
+    ../../home/shared/darwin
+    ../../home/shared/darwin/dock
   ];
 
+  # It me
+  users.users.${username} = {
+    name = "${username}";
+    home = "/Users/${username}";
+    isHidden = false;
+    shell = pkgs.zsh;
+  };
+
+  homebrew = packages.homebrewPackages;
+  environment.systemPackages = packages.systemPackages;
   services.nix-daemon.enable = true;
 
   nix = {
     package = pkgs.nix;
     settings = {
-      trusted-users = [ "@admin" "${user}" ];
+      trusted-users = [ "@admin" "${username}" ];
       substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
       trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
     };
@@ -31,11 +43,7 @@ let user = "leavism"; in
     '';
   };
 
-
-  environment.systemPackages = with pkgs; [
-    # System specific package installs
-  ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; });
-
+  # === Configure System Settings ===
   system = {
     checks.verifyNixPath = false;
     stateVersion = 4;
@@ -47,11 +55,11 @@ let user = "leavism"; in
       };
 
       dock = {
-        autohide = false;
+        autohide = true;
         show-recents = false;
         launchanim = true;
-        orientation = "bottom";
-        tilesize = 50;
+        orientation = "left";
+        tilesize = 45;
       };
     };
   };
@@ -59,11 +67,10 @@ let user = "leavism"; in
   # Fully declarative dock using the latest from Nix Store
   local.dock.enable = true;
   local.dock.entries = [
-    { path = "/System/Applications/FaceTime.app/"; }
     { path = "/System/Applications/Messages.app/"; }
     { path = "/System/Applications/Music.app/"; }
     {
-      path = "${config.users.users.${user}.home}/Downloads";
+      path = "${config.users.users.${user.name}.home}/Downloads";
       section = "others";
       options = "--sort name --view grid --display stack";
     }

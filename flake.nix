@@ -11,6 +11,12 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Declarative tap management
     homebrew-bundle = {
       url = "github:homebrew/homebrew-bundle";
       flake = false;
@@ -23,13 +29,14 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
+    aerospace = {
+      url = "github:nikitabobko/homebrew-tap";
+      flake = false;
     };
   };
 
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, nixpkgs, disko } @inputs:
+  # Add your tap into the outputs
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, aerospace, nixpkgs, disko } @inputs:
     let
       # Define users and their configurations
       users = {
@@ -90,7 +97,6 @@
         inherit system;
         specialArgs = {
           inherit inputs hostname user;
-          host = hostname;
         };
         modules = [
           home-manager.darwinModules.home-manager
@@ -100,11 +106,15 @@
               user = username;
               enable = true;
               taps = {
+                # Prepend the repo part of all taps with "homebrew-".
+                # ex: nikitabobko/HOMEBREW-tap
+                # Don't forget to declare your taps in inputs and outputs too.
                 "homebrew/homebrew-core" = homebrew-core;
                 "homebrew/homebrew-cask" = homebrew-cask;
                 "homebrew/homebrew-bundle" = homebrew-bundle;
+                "nikitabobko/homebrew-tap" = inputs.aerospace;
               };
-              mutableTaps = false;
+              mutableTaps = false; # Declarative taps
               autoMigrate = true;
             };
             home-manager = {
@@ -125,9 +135,7 @@
       in nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
-          inherit inputs hostname;
-          userConfig = user;
-          host = hostname;
+          inherit inputs hostname user;
         };
         modules = [
           disko.nixosModules.disko
@@ -148,7 +156,6 @@
       apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
 
       darwinConfigurations = {
-        # Add macOS configurations here. They'll apply based on hostname
         default = mkDarwinConfig "default" "leavism";
         muninn = mkDarwinConfig "muninn" "leavism";
         odin = mkDarwinConfig "odin" "leavism";

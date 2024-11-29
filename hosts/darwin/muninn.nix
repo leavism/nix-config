@@ -3,11 +3,12 @@
 let
   username = user.name;
   hostname = config.host;
+  packages = import ../../home/${username}/packages.nix { inherit pkgs; hostname = "muninn"; };
 in
 {
   imports = [
-    ../../home/common/darwin
-    ../../home/common/darwin/dock
+    ../../home/shared/darwin
+    ../../home/shared/darwin/dock
   ];
 
   # It me
@@ -18,6 +19,8 @@ in
     shell = pkgs.zsh;
   };
 
+  homebrew = packages.homebrewPackages;
+  environment.systemPackages = packages.systemPackages;
   services.nix-daemon.enable = true;
 
   nix = {
@@ -39,32 +42,6 @@ in
       experimental-features = nix-command flakes
     '';
   };
-
-
-  homebrew = {
-      enable = true;
-      casks = [];
-      # onActivation.cleanup = "uninstall";
-
-      # These app IDs are from using the mas CLI app
-      # mas = mac app store
-      # https://github.com/mas-cli/mas
-      #
-      # $ nix shell nixpkgs#mas
-      # $ mas search <app name>
-      #
-      # If you have previously added these apps to your Mac App Store profile (but not installed them on this system),
-      # you may receive an error message "Redownload Unavailable with This Apple ID".
-      # This message is safe to ignore. (https://github.com/dustinlyons/nixos-config/issues/83)
-      masApps = {
-        # Mac App Store install
-      };
-    };
-
-  environment.systemPackages = with pkgs; [
-    # System specific package installs
-  ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; });
-
 
   # === Configure System Settings ===
   system = {
