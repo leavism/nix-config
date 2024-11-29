@@ -1,7 +1,9 @@
-{ config, inputs, pkgs, ... }:
+{ config, inputs, user, pkgs, ... }:
 
-let user = "leavism";
-    keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOk8iAnIaa1deoc7jw8YACPNVka1ZFJxhnU4G74TmS+p" ]; in
+let username = user.name;
+    # TODO: SSH keys aren't fleshed out yet
+    # keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOk8iAnIaa1deoc7jw8YACPNVka1ZFJxhnU4G74TmS+p" ];
+in
 {
   imports = [
     ../../modules/nixos/disk-config.nix
@@ -63,7 +65,7 @@ let user = "leavism";
     zsh.enable = true;
   };
 
-  services = { 
+  services = {
     xserver = {
       enable = true;
 
@@ -221,17 +223,6 @@ let user = "leavism";
 
     gvfs.enable = true; # Mount, trash, and other functionalities
     tumbler.enable = true; # Thumbnail support for images
-
-    # Emacs runs as a daemon
-    emacs = {
-      enable = true;
-      package = pkgs.emacs-unstable;
-    };
-  };
-
-  # When emacs builds from no cache, it exceeds the 90s timeout default
-  systemd.user.services.emacs = {
-    serviceConfig.TimeoutStartSec = "7min";
   };
 
   # Enable sound
@@ -268,11 +259,12 @@ let user = "leavism";
         "docker"
       ];
       shell = pkgs.zsh;
-      openssh.authorizedKeys.keys = keys;
+      # TODO: SSH keys aren't fleshed out yet
+      # openssh.authorizedKeys.keys = keys;
     };
-
     root = {
-      openssh.authorizedKeys.keys = keys;
+      # TODO: SSH keys aren't fleshed out yet
+      # openssh.authorizedKeys.keys = keys;
     };
   };
 
