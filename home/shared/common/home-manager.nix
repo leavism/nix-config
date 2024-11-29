@@ -1,9 +1,16 @@
+/*
+ * Home-Manager Configurations shared across macOS and NixOS
+ * https://nix-community.github.io/home-manager/index.xhtml
+ *
+ * Home Manager is a Nix-powered tool for reproducible management of the
+ * contents of users’ home directories. This includes programs, configuration
+ * files, environment variables and, well… arbitrary files.
+ */
 { config, pkgs, lib, user,... }:
-
 let
     name = user.fullName;
-    username =  user.name;
-    email =  user.email;
+    username = user.name;
+    email = user.email;
 in
 {
   git = {
@@ -11,13 +18,11 @@ in
     ignores = [ "*.swp" ];
     userName = username;
     userEmail = email;
-    lfs = {
-      enable = true;
-    };
+    lfs.enable = true;
     extraConfig = {
       init.defaultBranch = "main";
       core = {
-	    editor = "vim";
+        editor = "vim";
         autocrlf = "input";
       };
       pull.rebase = true;
@@ -28,8 +33,9 @@ in
   ssh = {
     enable = true;
     includes = [
-      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
-        "/home/${username}/.ssh/config_external"
+      (lib.mkIf
+        pkgs.stdenv.hostPlatform.isLinux
+            "/home/${username}/.ssh/config_external"
       )
       (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
         "/Users/${username}/.ssh/config_external"
@@ -49,4 +55,5 @@ in
       };
     };
   };
+  # Add other program configurations here
 }
