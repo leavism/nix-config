@@ -31,7 +31,9 @@ let
   # === Base Packages ===
   # Packages that should be on all machines.
   # Default to system packages, unless you want something for just the user.
-  baseSystemPackages = with pkgs; [];
+  baseSystemPackages = with pkgs; [
+    mkalias
+  ];
 
   baseUserPackages = with pkgs; [];
 
@@ -47,15 +49,15 @@ let
       "1password" # Nix package is broken on macOS
     ];
     masApps = {
-      "Fantastical" = 975937182;
-      "Things" = 904280696;
-      "Microsoft OneNote" = 784801555;
-      "Craft" = 1487937127;
-      "OneDrive" = 823766827;
-      "Microsoft Excel" = 462058435;
-      "Microsoft Outlook" = 985367838;
-      "Microsoft Word" = 462054704;
-      "Microsoft PowerPoint" = 462062816;
+      # "Fantastical" = 975937182;
+      # "Things" = 904280696;
+      # "Microsoft OneNote" = 784801555;
+      # "Craft" = 1487937127;
+      # "OneDrive" = 823766827;
+      # "Microsoft Excel" = 462058435;
+      # "Microsoft Outlook" = 985367838;
+      # "Microsoft Word" = 462054704;
+      # "Microsoft PowerPoint" = 462062816;
     };
   };
 
@@ -67,12 +69,14 @@ let
       # Default to system packages, unless you want something for just the user.
       systemPackages = with pkgs; [
         # Muninn-specific system packages
-      ] ++ dev-light ++ work;
+      ];
       homebrewPackages = {
         casks = [];
         masApps = {};
       };
-      userPackages = with pkgs; [];
+      userPackages = with pkgs; [
+
+      ];
     };
 
     # Odin-specific packages

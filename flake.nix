@@ -8,12 +8,12 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
-    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-homebrew = {
+      url = "github:zhaofengli-wip/nix-homebrew";
     };
 
     # Declarative tap management
@@ -39,11 +39,11 @@
   outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, home-manager, aerospace, nixpkgs, disko } @inputs:
     let
       # Define users and their configurations
-      users = {
+      usersList = {
         leavism = {
-          name = "leavism";
-          email = "ghuydang@gmail.com";
           fullName = "Huy Dang";
+          username = "leavism";
+          email = "ghuydang@gmail.com";
         };
       };
 
@@ -92,7 +92,7 @@
       # Helper function to create Darwin configuration
       mkDarwinConfig = hostname: username: let
         system = "aarch64-darwin";
-        user = users.${username};
+        user = usersList.${username};
       in darwin.lib.darwinSystem {
         inherit system;
         specialArgs = {
@@ -119,7 +119,6 @@
             };
             home-manager = {
               useGlobalPkgs = true;
-              useUserPackages = true;
               extraSpecialArgs = { inherit user; };
               users.${username} = import ./home/${username}/${hostname}.nix;
             };
@@ -131,7 +130,7 @@
       # Helper function to create NixOS configuration
       mkNixosConfig = hostname: username: let
         system = "x86_64-linux";
-        user = users.${username};
+        user = usersList.${username};
       in nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {

@@ -1,7 +1,7 @@
 { config, pkgs, lib, user,... }:
 
 let
-  username = user.name;
+  username = user.username;
   hostname = config.host;
   packages = import ../../home/${username}/packages.nix { inherit pkgs; };
 in

@@ -9,14 +9,14 @@
 { config, pkgs, lib, user,... }:
 let
     name = user.fullName;
-    username = user.name;
+    username = user.username;
     email = user.email;
 in
 {
   git = {
     enable = true;
     ignores = [ "*.swp" ];
-    userName = username;
+    userName = username; # assuming the username on the machine is same for any remote repos
     userEmail = email;
     lfs.enable = true;
     extraConfig = {
